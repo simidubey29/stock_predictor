@@ -14,10 +14,12 @@ st.sidebar.title("⚙️ Controls")
 ticker = st.sidebar.text_input("Enter Stock Ticker", "AAPL")
 future_days = st.sidebar.slider("Days to Predict", 7, 90, 30)
 
+st.info("💡 Example: AAPL (US) | RELIANCE.NS (India)")
+
 if st.sidebar.button("Predict 🚀"):
 
     if not ticker:
-        st.warning("⚠️ Please enter a valid stock ticker")
+        st.warning("⚠️ Please enter a stock ticker")
     else:
         try:
             # Load data
@@ -32,12 +34,12 @@ if st.sidebar.button("Predict 🚀"):
             # Build model
             model = build_model((X.shape[1], 1))
 
-            # Train model
+            # Train
             model = train_model(model, X, y)
 
             st.success("✅ Model Trained Successfully!")
 
-            # Predict future
+            # Predict
             future_predictions = predict_future(model, df, scaler)
 
             # Plot
@@ -62,4 +64,4 @@ if st.sidebar.button("Predict 🚀"):
             st.write(future_df)
 
         except Exception as e:
-            st.error(f"❌ Error: {e}")
+            st.error(f"❌ {e}")
