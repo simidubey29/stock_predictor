@@ -6,18 +6,25 @@ from tensorflow.keras.layers import LSTM, Dense, Dropout
 
 
 def load_data(ticker):
-    # Try fetching 5 years data
-    data = yf.download(ticker, period="5y", progress=False)
+    import yfinance as yf
+    import pandas as pd
 
-    # Retry if empty
-    if data.empty:
-        data = yf.download(ticker, period="1y", progress=False)
+    try:
+        data = yf.download(ticker, period="5y", progress=False)
 
-    # Final check
-    if data.empty:
-        raise ValueError("Invalid ticker or no data available")
+        # ✅ Fix: if API fails, try different method
+        if data.empty:
+            stock = yf.Ticker(ticker)
+            data = stock.history(period="5y")
 
-    return data
+        # ✅ Final fallback (avoid crash)
+        if data.empty:
+            raise ValueError("⚠️ Could not fetch data. Try AAPL or RELIANCE.NS")
+
+        return data
+
+    except Exception:
+        raise ValueError("⚠️ Network/API issue. Try again later or change ticker.")
 
 
 def preprocess_data(data):

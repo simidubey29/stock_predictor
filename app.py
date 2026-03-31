@@ -64,4 +64,15 @@ if st.sidebar.button("Predict 🚀"):
             st.write(future_df)
 
         except Exception as e:
-            st.error(f"❌ {e}")
+            st.error(f"{e}")
+
+            st.warning("⚡ Showing demo data instead")
+
+            import numpy as np
+            import pandas as pd
+
+            demo_data = pd.DataFrame({
+                "Close": np.linspace(100, 150, 100)
+            })
+
+            st.line_chart(demo_data)
