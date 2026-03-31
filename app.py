@@ -14,6 +14,7 @@ ticker = st.sidebar.text_input("Enter Stock Ticker", "AAPL")
 future_days = st.sidebar.slider("Days to Predict", 7, 90, 30)
 
 if st.sidebar.button("Predict 🚀"):
+
     # Load data
     df = load_data(ticker)
 
@@ -21,16 +22,18 @@ if st.sidebar.button("Predict 🚀"):
     st.write(df.tail())
 
     # Preprocess
-    X, y, scaler, scaled_data = preprocess_data(df)
+    X, y, scaler = preprocess_data(df)
 
-    # Build & Train model
-    model = build_model()
+    # ✅ FIX: pass input shape
+    model = build_model((X.shape[1], 1))
+
+    # Train
     model = train_model(model, X, y)
 
     st.success("✅ Model Trained Successfully!")
 
     # Predict future
-    future_predictions = predict_future(model, scaled_data, scaler, future_days)
+    future_predictions = predict_future(model, df, scaler)
 
     # Plot
     st.subheader("📈 Stock Price Prediction")
@@ -38,8 +41,7 @@ if st.sidebar.button("Predict 🚀"):
     plt.figure()
     plt.plot(df['Close'], label="Actual Price")
 
-    # Future index
-    future_index = range(len(df), len(df) + future_days)
+    future_index = range(len(df), len(df) + len(future_predictions))
 
     plt.plot(future_index, future_predictions, label="Predicted Price")
 
@@ -49,7 +51,8 @@ if st.sidebar.button("Predict 🚀"):
 
     st.pyplot(plt)
 
-    # Show predictions table
+    # Table
     future_df = pd.DataFrame(future_predictions, columns=["Predicted Price"])
+
     st.subheader("🔮 Future Predictions")
     st.write(future_df)
