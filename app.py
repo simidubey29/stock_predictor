@@ -10,49 +10,56 @@ st.title("📈 AI Stock Prediction Dashboard")
 st.write("Powered by LSTM Deep Learning 🚀")
 
 # Sidebar
+st.sidebar.title("⚙️ Controls")
 ticker = st.sidebar.text_input("Enter Stock Ticker", "AAPL")
 future_days = st.sidebar.slider("Days to Predict", 7, 90, 30)
 
 if st.sidebar.button("Predict 🚀"):
 
-    # Load data
-    df = load_data(ticker)
+    if not ticker:
+        st.warning("⚠️ Please enter a valid stock ticker")
+    else:
+        try:
+            # Load data
+            df = load_data(ticker)
 
-    st.subheader("📊 Raw Data")
-    st.write(df.tail())
+            st.subheader("📊 Raw Data")
+            st.write(df.tail())
 
-    # Preprocess
-    X, y, scaler = preprocess_data(df)
+            # Preprocess
+            X, y, scaler = preprocess_data(df)
 
-    # ✅ FIX: pass input shape
-    model = build_model((X.shape[1], 1))
+            # Build model
+            model = build_model((X.shape[1], 1))
 
-    # Train
-    model = train_model(model, X, y)
+            # Train model
+            model = train_model(model, X, y)
 
-    st.success("✅ Model Trained Successfully!")
+            st.success("✅ Model Trained Successfully!")
 
-    # Predict future
-    future_predictions = predict_future(model, df, scaler)
+            # Predict future
+            future_predictions = predict_future(model, df, scaler)
 
-    # Plot
-    st.subheader("📈 Stock Price Prediction")
+            # Plot
+            st.subheader("📈 Stock Price Prediction")
 
-    plt.figure()
-    plt.plot(df['Close'], label="Actual Price")
+            plt.figure()
+            plt.plot(df['Close'], label="Actual Price")
 
-    future_index = range(len(df), len(df) + len(future_predictions))
+            future_index = range(len(df), len(df) + len(future_predictions))
+            plt.plot(future_index, future_predictions, label="Predicted Price")
 
-    plt.plot(future_index, future_predictions, label="Predicted Price")
+            plt.xlabel("Time")
+            plt.ylabel("Price")
+            plt.legend()
 
-    plt.xlabel("Time")
-    plt.ylabel("Price")
-    plt.legend()
+            st.pyplot(plt)
 
-    st.pyplot(plt)
+            # Table
+            future_df = pd.DataFrame(future_predictions, columns=["Predicted Price"])
 
-    # Table
-    future_df = pd.DataFrame(future_predictions, columns=["Predicted Price"])
+            st.subheader("🔮 Future Predictions")
+            st.write(future_df)
 
-    st.subheader("🔮 Future Predictions")
-    st.write(future_df)
+        except Exception as e:
+            st.error(f"❌ Error: {e}")

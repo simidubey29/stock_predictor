@@ -11,6 +11,16 @@ def load_data(ticker):
 
 
 def preprocess_data(data):
+    # ❌ Fix: empty data
+    if data.empty:
+        raise ValueError("No data found for this stock ticker")
+
+    # ❌ Fix: remove NaN values
+    data = data.dropna()
+
+    if len(data) < 60:
+        raise ValueError("Not enough data to train model (need 60+ rows)")
+
     scaler = MinMaxScaler(feature_range=(0, 1))
     scaled_data = scaler.fit_transform(data['Close'].values.reshape(-1, 1))
 
@@ -45,20 +55,23 @@ def build_model(input_shape):
 
 
 def train_model(model, x_train, y_train):
-    model.fit(x_train, y_train, epochs=5, batch_size=32)
+    model.fit(x_train, y_train, epochs=5, batch_size=32, verbose=0)
     return model
 
 
 def predict_future(model, data, scaler):
+    data = data.dropna()
+
     last_60_days = data['Close'].values[-60:]
     last_60_days = scaler.transform(last_60_days.reshape(-1, 1))
 
     X_test = []
     X_test.append(last_60_days)
+
     X_test = np.array(X_test)
     X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
 
-    pred_price = model.predict(X_test)
+    pred_price = model.predict(X_test, verbose=0)
     pred_price = scaler.inverse_transform(pred_price)
 
     return pred_price
